@@ -17,6 +17,6 @@ public class InMemoryAdditionalText : AdditionalText
 
     public override SourceText GetText(CancellationToken cancellationToken = default)
     {
-        return SourceText.From(_text, Encoding.UTF8);
+        return SourceText.From(_text.UseLfNewLine(), Encoding.UTF8);
     }
 }
