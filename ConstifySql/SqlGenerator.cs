@@ -1,5 +1,7 @@
 ﻿using System.Text;
+using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Text;
 
 namespace ConstifySql;
@@ -11,6 +13,8 @@ public class SqlGenerator : IIncrementalGenerator
     private const string DefaultClassName = "SqlQueries";
 
     private static readonly char[] DirectorySeparatorChars = ['/'];
+    // TODO: this could be parameterized from options
+    private static readonly Regex QueryParametersRegex = new(@"(?:[@:]\w+)", RegexOptions.Compiled);
 
     private const string ConstifySqlOptionsAttribute =
         """
@@ -61,6 +65,10 @@ public class SqlGenerator : IIncrementalGenerator
         var fileName = Path.GetFileNameWithoutExtension(generationContext.PathAndContents.Path);
         var content = generationContext.PathAndContents.Content;
         var generatedFileName = $"{fileName}.g.cs";
+        var queryParameters = QueryParametersRegex.Matches(content)
+            .Cast<Match>()
+            .Select(m => m.Value)
+            .ToArray();
 
         var namespaceName = generationContext.Options.FirstOrDefault(o => o.Key == "Namespace").Value.Value as string ?? DefaultNamespace;
         var className = generationContext.Options.FirstOrDefault(o => o.Key == "ClassName").Value.Value as string ?? DefaultClassName;
@@ -96,7 +104,8 @@ public class SqlGenerator : IIncrementalGenerator
                 indentedStringBuilder.IncrementIndent();
             }
 
-            indentedStringBuilder.AppendLine($"public const string {fileName} = @\"{content}\";");
+            AppendParametersXmlDescription(indentedStringBuilder, queryParameters);
+            indentedStringBuilder.AppendLine($"public const string {fileName} = {ToLiteral(content)};");
 
             foreach (var _ in folders)
             {
@@ -106,7 +115,8 @@ public class SqlGenerator : IIncrementalGenerator
         }
         else
         {
-            indentedStringBuilder.AppendLine($"public const string {fileName} = @\"{content}\";");
+            AppendParametersXmlDescription(indentedStringBuilder, queryParameters);
+            indentedStringBuilder.AppendLine($"public const string {fileName} = {ToLiteral(content)};");
         }
 
         indentedStringBuilder.DecrementIndent();
@@ -115,5 +125,30 @@ public class SqlGenerator : IIncrementalGenerator
         indentedStringBuilder.AppendLine("}");
 
         context.AddSource(generatedFileName, SourceText.From(indentedStringBuilder.ToString(), Encoding.UTF8));
+    }
+
+    private static string ToLiteral(string input)
+    {
+        return SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal(input)).ToFullString();
+    }
+
+    private static void AppendParametersXmlDescription(IndentedStringBuilder sb, string[] queryParameters)
+    {
+        if (queryParameters.Length == 0)
+        {
+            return;
+        }
+
+        sb.AppendLine("/// <summary>");
+        sb.AppendLine("/// Query parameters:");
+        sb.AppendLine("/// <list type=\"bullet\">");
+
+        foreach (var parameter in queryParameters)
+        {
+            sb.AppendLine($"/// <item><description>{parameter}</description></item>");
+        }
+
+        sb.AppendLine("/// </list>");
+        sb.AppendLine("/// </summary>");
     }
 }

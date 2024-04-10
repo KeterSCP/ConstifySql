@@ -6,18 +6,17 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>true</ImplicitUsings>
         <LangVersion>Latest</LangVersion>
-
-<!--        <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>-->
-<!--        <IsRoslynComponent>true</IsRoslynComponent>-->
     </PropertyGroup>
 
     <PropertyGroup>
         <IsPackable>true</IsPackable>
+        <Authors>KeterSCP</Authors>
         <PackageId>ConstifySql</PackageId>
         <Title>ConstifySQL</Title>
-        <Description>Generate POCO classes for sql scripts</Description>
+        <Description>Generate POCO classes with constant sql scripts from sql files</Description>
         <PackageVersion>0.1.0</PackageVersion>
         <PackageProjectUrl>https://github.com/KeterSCP/ConstifySql</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/KeterSCP/ConstifySql</RepositoryUrl>
     </PropertyGroup>
 
     <ItemGroup>
