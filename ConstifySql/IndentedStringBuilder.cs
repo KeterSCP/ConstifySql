@@ -12,26 +12,6 @@ internal class IndentedStringBuilder
 
     private readonly StringBuilder _stringBuilder = new();
 
-    public int IndentCount => _indent;
-
-    public int Length => _stringBuilder.Length;
-
-    public IndentedStringBuilder Append(string value)
-    {
-        DoIndent();
-
-        _stringBuilder.Append(value);
-
-        return this;
-    }
-
-    public IndentedStringBuilder AppendLine()
-    {
-        AppendLine(string.Empty);
-
-        return this;
-    }
-
     public IndentedStringBuilder AppendLine(string value)
     {
         if (value.Length != 0)
@@ -42,25 +22,6 @@ internal class IndentedStringBuilder
         _stringBuilder.AppendLine(value);
 
         _indentPending = true;
-
-        return this;
-    }
-
-    public IndentedStringBuilder AppendLine(FormattableString value)
-    {
-        DoIndent();
-
-        _stringBuilder.Append(value);
-
-        _indentPending = true;
-
-        return this;
-    }
-
-    public IndentedStringBuilder Clear()
-    {
-        _stringBuilder.Clear();
-        _indent = 0;
 
         return this;
     }

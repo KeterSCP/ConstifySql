@@ -1,0 +1,7 @@
+<Project>
+    <ItemGroup>
+        <CompilerVisibleProperty Include="ConstifySql_Namespace" />
+        <CompilerVisibleProperty Include="ConstifySql_ClassName" />
+        <CompilerVisibleProperty Include="ConstifySql_SplitByClassesFromRoot" />
+    </ItemGroup>
+</Project>
