@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConstifySql", "ConstifySql\ConstifySql.csproj", "{E68D60B4-0C2A-40DA-84CF-7DC757A469FD}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution files", "Solution files", "{F866ECE7-10FF-4F83-8731-B5E343187F7C}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		LICENSE = LICENSE
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E68D60B4-0C2A-40DA-84CF-7DC757A469FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E68D60B4-0C2A-40DA-84CF-7DC757A469FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E68D60B4-0C2A-40DA-84CF-7DC757A469FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E68D60B4-0C2A-40DA-84CF-7DC757A469FD}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
