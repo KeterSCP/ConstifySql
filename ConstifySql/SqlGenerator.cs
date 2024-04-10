@@ -15,6 +15,7 @@ public class SqlGenerator : IIncrementalGenerator
     private static readonly char[] DirectorySeparatorChars = ['/'];
     // TODO: this could be parameterized from options
     private static readonly Regex QueryParametersRegex = new(@"[@:]\w+", RegexOptions.Compiled);
+    private static readonly Dictionary<string, int> GeneratedFileNames = new();
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
@@ -49,7 +50,7 @@ public class SqlGenerator : IIncrementalGenerator
         var fileAbsolutePath = generationContext.PathAndContents.Path;
         var fileName = Path.GetFileNameWithoutExtension(generationContext.PathAndContents.Path);
         var content = generationContext.PathAndContents.Content;
-        var generatedFileName = $"{fileName}.g.cs";
+        var generatedFileName = $"{GetGeneratedFileName(fileName)}.g.cs";
         var queryParameters = QueryParametersRegex.Matches(content)
             .Cast<Match>()
             .Select(m => m.Value)
@@ -135,5 +136,17 @@ public class SqlGenerator : IIncrementalGenerator
 
         sb.AppendLine("/// </list>");
         sb.AppendLine("/// </summary>");
+    }
+
+    private static string GetGeneratedFileName(string fileName)
+    {
+        if (!GeneratedFileNames.ContainsKey(fileName))
+        {
+            GeneratedFileNames[fileName] = 0;
+            return fileName;
+        }
+
+        GeneratedFileNames[fileName]++;
+        return $"{fileName}_{GeneratedFileNames[fileName]}";
     }
 }
