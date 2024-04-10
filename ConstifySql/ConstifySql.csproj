@@ -17,6 +17,8 @@
         <PackageVersion>0.1.0</PackageVersion>
         <PackageProjectUrl>https://github.com/KeterSCP/ConstifySql</PackageProjectUrl>
         <RepositoryUrl>https://github.com/KeterSCP/ConstifySql</RepositoryUrl>
+        <PackageLicenseFile>LICENSE</PackageLicenseFile>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
 
     <ItemGroup>
@@ -27,6 +29,8 @@
     <ItemGroup>
         <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
         <None Include="ConstifySql.props" Pack="true" PackagePath="build" Visible="false" />
+        <None Include="LICENSE" Pack="true" PackagePath=""/>
+        <None Include="README.md" Pack="true" PackagePath=""/>
     </ItemGroup>
 
     <ItemGroup>
