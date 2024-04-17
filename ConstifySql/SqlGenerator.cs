@@ -15,18 +15,18 @@ public class SqlGenerator : IIncrementalGenerator
     private static readonly char[] DirectorySeparatorChars = ['/'];
     // TODO: this could be parameterized from options
     private static readonly Regex QueryParametersRegex = new(@"[@:]\w+", RegexOptions.Compiled);
-    private static readonly Dictionary<string, int> GeneratedFileNames = new();
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        var customParameters = context.AnalyzerConfigOptionsProvider
+        var generatorOptions = context.AnalyzerConfigOptionsProvider
             .Select((configOptions, _) =>
             {
                 configOptions.GlobalOptions.TryGetValue("build_property.ConstifySql_Namespace", out var namespaceConfig);
                 configOptions.GlobalOptions.TryGetValue("build_property.ConstifySql_ClassName", out var classNameConfig);
                 configOptions.GlobalOptions.TryGetValue("build_property.ConstifySql_SplitByClassesFromRoot", out var splitByClassesFromRootConfig);
+                configOptions.GlobalOptions.TryGetValue("build_property.RootNamespace", out var rootNamespace);
 
-                return (Namespace: namespaceConfig, ClassName: classNameConfig, SplitByClassesFromRoot: splitByClassesFromRootConfig);
+                return new GeneratorOptions(@namespace: namespaceConfig, className: classNameConfig, splitByClassesFromRoot: splitByClassesFromRootConfig, rootNamespace: rootNamespace);
             });
 
         var files = context.AdditionalTextsProvider.Where(f => f.Path.EndsWith(".sql"));
@@ -38,19 +38,18 @@ public class SqlGenerator : IIncrementalGenerator
             return (Path: text.Path, Content: content);
         });
 
-        var filesAndParameters = pathAndContents.Combine(customParameters);
+        var filesAndOptions = pathAndContents.Combine(generatorOptions);
 
-        context.RegisterSourceOutput(filesAndParameters, Generate);
+        context.RegisterSourceOutput(filesAndOptions, Generate);
     }
 
     private static void Generate(
         SourceProductionContext context,
-        ((string Path, string Content) PathAndContents, (string? Namespace, string? ClassName, string? SplitByClassesFromRoot) Options) generationContext)
+        ((string Path, string Content) PathAndContents, GeneratorOptions Options) generationContext)
     {
         var fileAbsolutePath = generationContext.PathAndContents.Path;
         var fileName = Path.GetFileNameWithoutExtension(generationContext.PathAndContents.Path);
         var content = generationContext.PathAndContents.Content;
-        var generatedFileName = $"{GetGeneratedFileName(fileName)}.g.cs";
         var queryParameters = QueryParametersRegex.Matches(content)
             .Cast<Match>()
             .Select(m => m.Value)
@@ -58,7 +57,9 @@ public class SqlGenerator : IIncrementalGenerator
 
         var namespaceName = string.IsNullOrWhiteSpace(generationContext.Options.Namespace) ? DefaultNamespace : generationContext.Options.Namespace;
         var className = string.IsNullOrWhiteSpace(generationContext.Options.ClassName) ? DefaultClassName : generationContext.Options.ClassName;
-        var splitByClassesFromRoot = generationContext.Options.SplitByClassesFromRoot;
+
+        var splitFolders = GetSplitFolders(fileAbsolutePath, generationContext.Options);
+        var generatedFileName = $"{GetGeneratedFileName(fileName, splitFolders)}.g.cs";
 
         var indentedStringBuilder = new IndentedStringBuilder();
 
@@ -71,19 +72,9 @@ public class SqlGenerator : IIncrementalGenerator
         indentedStringBuilder.AppendLine("{");
         indentedStringBuilder.IncrementIndent();
 
-        if (!string.IsNullOrEmpty(splitByClassesFromRoot))
+        if (splitFolders.Length > 0)
         {
-            var normalizedRoot = splitByClassesFromRoot!.Replace('\\', '/');
-            var normalizedFilePath = fileAbsolutePath.Replace('\\', '/');
-
-            var folders = normalizedFilePath
-                .Substring(normalizedFilePath.LastIndexOf(normalizedRoot, StringComparison.Ordinal) + normalizedRoot.Length)
-                .Split(DirectorySeparatorChars, StringSplitOptions.RemoveEmptyEntries)
-                .AsSpan();
-
-            folders = folders.Slice(0, folders.Length - 1); // Skip last element (sql file itself)
-
-            foreach (var folder in folders)
+            foreach (var folder in splitFolders)
             {
                 indentedStringBuilder.AppendLine($"public static partial class {folder}");
                 indentedStringBuilder.AppendLine("{");
@@ -93,7 +84,7 @@ public class SqlGenerator : IIncrementalGenerator
             AppendParametersXmlDescription(indentedStringBuilder, queryParameters);
             indentedStringBuilder.AppendLine($"public const string {fileName} = {ToLiteral(content)};");
 
-            foreach (var _ in folders)
+            foreach (var _ in splitFolders)
             {
                 indentedStringBuilder.DecrementIndent();
                 indentedStringBuilder.AppendLine("}");
@@ -138,15 +129,43 @@ public class SqlGenerator : IIncrementalGenerator
         sb.AppendLine("/// </summary>");
     }
 
-    private static string GetGeneratedFileName(string fileName)
+    private static ReadOnlySpan<string> GetSplitFolders(string fileAbsolutePath, GeneratorOptions generatorOptions)
     {
-        if (!GeneratedFileNames.ContainsKey(fileName))
+        var normalizedFilePath = fileAbsolutePath.Replace('\\', '/');
+        var root = string.IsNullOrWhiteSpace(generatorOptions.SplitByClassesFromRoot) ? generatorOptions.RootNamespace : generatorOptions.SplitByClassesFromRoot;
+
+        if (!string.IsNullOrWhiteSpace(root))
         {
-            GeneratedFileNames[fileName] = 0;
+            var normalizedRoot = root!.Replace('\\', '/');
+
+            var folders = normalizedFilePath
+                .Substring(normalizedFilePath.LastIndexOf(normalizedRoot, StringComparison.Ordinal) + normalizedRoot.Length)
+                .Split(DirectorySeparatorChars, StringSplitOptions.RemoveEmptyEntries)
+                .AsSpan();
+
+            return folders.Slice(0, folders.Length - 1); // Skip last element (sql file itself)
+        }
+
+        return ReadOnlySpan<string>.Empty;
+    }
+
+    private static string GetGeneratedFileName(string fileName, ReadOnlySpan<string> splitFolders)
+    {
+        if (splitFolders.Length == 0)
+        {
             return fileName;
         }
 
-        GeneratedFileNames[fileName]++;
-        return $"{fileName}_{GeneratedFileNames[fileName]}";
+        var fileNameSb = new StringBuilder();
+
+        foreach (var folder in splitFolders)
+        {
+            fileNameSb.Append(folder);
+            fileNameSb.Append('.');
+        }
+
+        fileNameSb.Append(fileName);
+
+        return fileNameSb.ToString();
     }
 }

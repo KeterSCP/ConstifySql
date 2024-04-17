@@ -14,7 +14,7 @@
         <PackageId>ConstifySql</PackageId>
         <Title>ConstifySQL</Title>
         <Description>Generate POCO classes with constant sql scripts from sql files</Description>
-        <PackageVersion>0.1.0</PackageVersion>
+        <PackageVersion>0.2.0</PackageVersion>
         <PackageProjectUrl>https://github.com/KeterSCP/ConstifySql</PackageProjectUrl>
         <RepositoryUrl>https://github.com/KeterSCP/ConstifySql</RepositoryUrl>
         <PackageLicenseFile>LICENSE</PackageLicenseFile>

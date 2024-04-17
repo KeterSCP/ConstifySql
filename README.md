@@ -47,7 +47,7 @@ It is possible to configure output of the generator:
     </PropertyGroup>
     ```
 
-- Root path from which subsequent folders will be generated as nested classes (default: null):
+- Root path from which subsequent folders will be generated as nested classes (default: `$(RootNamespace)` msbuild property):
     ```xml
     <PropertyGroup>
         <ConstifySql_SplitByClassesFromRoot>Database/Queries</ConstifySql_SplitByClassesFromRoot>
@@ -88,9 +88,10 @@ Demo usage:
 ```csharp
 using ConstifySql;
 
-var firstQueryText = SqlQueries.FirstQuery; // Note that there were two queries with identical file names, and with default configuration here will be a compilation error, as constant with the same name cannot be declared in the same class twice
-var secondQueryText = SqlQueries.SecondQuery;
-var thirdQueryText = SqlQueries.ThirdQuery;
+var firstQueryText = SqlQueries.Database.Queries.Group1.FirstQuery;
+var secondQueryText = SqlQueries.Database.Queries.Group1.SecondQuery;
+var firstQuery2Text = SqlQueries.Database.Queries.Group2.FirstQuery;
+var thirdQueryText = SqlQueries.Database.Queries.ThirdQuery;
 ```
 
 ### Custom configuration
@@ -121,6 +122,6 @@ using MyCustomNamespace;
 
 var firstQueryText = MyCustomClassName.Group1.FirstQuery;
 var secondQueryText = MyCustomClassName.Group1.SecondQuery;
-var firstQueryText2 = MyCustomClassName.Group2.FirstQuery; // <-- No error
+var firstQueryText2 = MyCustomClassName.Group2.FirstQuery;
 var thirdQueryText = MyCustomClassName.ThirdQuery;
 ```

@@ -74,4 +74,29 @@ public class GeneratorConfigurationTests : VerifyTestBase
 
         await Verify(generatedClassesTexts, GetSettings());
     }
+
+    [Fact(DisplayName = "Should correctly generated nested classes based on default root namespace")]
+    public async Task ShouldGenerateNestedClassesBasedOnDefaultRootNamespace()
+    {
+        var scripts = ImmutableArray.Create<AdditionalText>
+        (
+            new InMemoryAdditionalText("ProjectDir/Scripts/Group1/Subgroup1/FirstScript.sql", "SELECT 1;"),
+            new InMemoryAdditionalText("ProjectDir/Scripts/Group1/Subgroup1/SecondScript.sql", "SELECT 2;"),
+            new InMemoryAdditionalText("ProjectDir/Scripts/Group1/Subgroup2/ThirdScript.sql", "SELECT 3;"),
+            new InMemoryAdditionalText("ProjectDir/Scripts/Group2/FourthScript.sql", "SELECT 4;")
+        );
+
+        var generatedClassesTexts = TestHelper.GetAllSyntaxTrees
+            (
+                scripts,
+                msbuildProperties: new Dictionary<string, string>
+                {
+                    ["RootNamespace"] = "ProjectDir"
+                }
+            )
+            .Select(st => st.GetText().ToString())
+            .ToList();
+
+        await Verify(generatedClassesTexts, GetSettings());
+    }
 }
