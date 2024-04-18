@@ -5,7 +5,7 @@ namespace ConstifySql
 {
     public static partial class SqlQueries
     {
-        public const string FirstScript = "SELECT * FROM Table1;";
+        public const string FirstScript = @"SELECT * FROM Table1;";
     }
 }
 
@@ -16,7 +16,7 @@ namespace ConstifySql
 {
     public static partial class SqlQueries
     {
-        public const string SecondScript = "SELECT * FROM Table2;";
+        public const string SecondScript = @"SELECT * FROM Table2;";
     }
 }
 

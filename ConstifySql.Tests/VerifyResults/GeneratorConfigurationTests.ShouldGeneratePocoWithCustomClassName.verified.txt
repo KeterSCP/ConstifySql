@@ -4,6 +4,6 @@ namespace ConstifySql
 {
     public static partial class CustomClassName
     {
-        public const string FirstScript = "SELECT * FROM Table1;";
+        public const string FirstScript = @"SELECT * FROM Table1;";
     }
 }

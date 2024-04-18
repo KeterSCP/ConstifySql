@@ -4,6 +4,6 @@ namespace CustomNamespace
 {
     public static partial class SqlQueries
     {
-        public const string FirstScript = "SELECT * FROM Table1;";
+        public const string FirstScript = @"SELECT * FROM Table1;";
     }
 }

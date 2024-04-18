@@ -1,7 +1,6 @@
 ﻿using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Text;
 
 namespace ConstifySql;
@@ -82,7 +81,7 @@ public class SqlGenerator : IIncrementalGenerator
             }
 
             AppendParametersXmlDescription(indentedStringBuilder, queryParameters);
-            indentedStringBuilder.AppendLine($"public const string {fileName} = {ToLiteral(content)};");
+            indentedStringBuilder.AppendLine($"public const string {fileName} = @\"{ToVerbatimLiteral(content)}\";");
 
             foreach (var _ in splitFolders)
             {
@@ -93,7 +92,7 @@ public class SqlGenerator : IIncrementalGenerator
         else
         {
             AppendParametersXmlDescription(indentedStringBuilder, queryParameters);
-            indentedStringBuilder.AppendLine($"public const string {fileName} = {ToLiteral(content)};");
+            indentedStringBuilder.AppendLine($"public const string {fileName} = @\"{ToVerbatimLiteral(content)}\";");
         }
 
         indentedStringBuilder.DecrementIndent();
@@ -104,9 +103,9 @@ public class SqlGenerator : IIncrementalGenerator
         context.AddSource(generatedFileName, SourceText.From(indentedStringBuilder.ToString(), Encoding.UTF8));
     }
 
-    private static string ToLiteral(string input)
+    private static string ToVerbatimLiteral(string input)
     {
-        return SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal(input)).ToFullString();
+        return input.Replace("\"", "\"\"");
     }
 
     private static void AppendParametersXmlDescription(IndentedStringBuilder sb, string[] queryParameters)

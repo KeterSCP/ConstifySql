@@ -11,7 +11,7 @@ namespace ConstifySql
             {
                 public static partial class Subgroup1
                 {
-                    public const string FirstScript = "SELECT 1;";
+                    public const string FirstScript = @"SELECT 1;";
                 }
             }
         }
@@ -31,7 +31,7 @@ namespace ConstifySql
             {
                 public static partial class Subgroup1
                 {
-                    public const string SecondScript = "SELECT 2;";
+                    public const string SecondScript = @"SELECT 2;";
                 }
             }
         }
@@ -51,7 +51,7 @@ namespace ConstifySql
             {
                 public static partial class Subgroup2
                 {
-                    public const string ThirdScript = "SELECT 3;";
+                    public const string ThirdScript = @"SELECT 3;";
                 }
             }
         }
@@ -69,7 +69,7 @@ namespace ConstifySql
         {
             public static partial class Group2
             {
-                public const string FourthScript = "SELECT 4;";
+                public const string FourthScript = @"SELECT 4;";
             }
         }
     }

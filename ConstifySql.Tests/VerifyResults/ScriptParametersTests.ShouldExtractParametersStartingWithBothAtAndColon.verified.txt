@@ -12,6 +12,8 @@ namespace ConstifySql
         /// <item><description>:SomeColumn</description></item>
         /// </list>
         /// </summary>
-        public const string ThirdScript = "SELECT * FROM users u\nWHERE id = :id AND name = @name\nORDER by :SomeColumn;";
+        public const string ThirdScript = @"SELECT * FROM users u
+WHERE id = :id AND name = @name
+ORDER by :SomeColumn;";
     }
 }
